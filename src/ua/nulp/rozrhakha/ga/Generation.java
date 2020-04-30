@@ -1,10 +1,13 @@
-package ua.nulp.rozrhakha;
+package ua.nulp.rozrhakha.ga;
+
+import ua.nulp.rozrhakha.utils.Function;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.IntStream;
 
-public class Generation {
+public class Generation  {
 
     static final int DEFAULT_SIZE = 100;
     static final int DEFAULT_MULTIPLY_NUMBER = (int) (DEFAULT_SIZE * 0.5);
@@ -18,9 +21,12 @@ public class Generation {
     private static Instance instancePattern;
     private static Function function;
     private static int params;
+    private static boolean isParallel;
 
     private ArrayList<Instance> population;
     private HashMap<Double, Instance> multiplyFrequencies;
+
+
 
     public static void setFunction(Function function, int params){
         Generation.params = params;
@@ -43,6 +49,10 @@ public class Generation {
         Generation.mutationProp = mutationProp;
     }
 
+    public static void setIsParallel(boolean isParallel) {
+        Generation.isParallel = isParallel;
+    }
+
     public static void setGenerationParams(int size, int multiplyNumber, double mutationProp) {
         setSize(size);
         setMultiplyNumber(multiplyNumber);
@@ -56,8 +66,12 @@ public class Generation {
     static Generation generateFirstGeneration(ArrayList<Entry<Double, Double>> limits) {
         Generation first = new Generation();
         Random random = new Random();
+        IntStream range = IntStream.range(0, multiplyNumber);
 
-        for (int i = 0; i < size; i++) {
+        if (isParallel) {
+            range = range.parallel();
+        }
+        range.forEach(i -> {
             ArrayList<Double> values = new ArrayList<>(params);
 
             for (int j = 0; j < params; j++) {
@@ -71,17 +85,23 @@ public class Generation {
             instance.setValues(values);
 
             first.add(instance);
-
-        }
+        });
 
         return first;
     }
 
-    static Generation generateFirstGeneration() {
+    public static Generation generateFirstGeneration() {
         ArrayList<Entry<Double, Double>> limits =
                 new ArrayList<>(Collections.nCopies(params,
                         new SimpleEntry<Double, Double>(-DEFAULT_LIMIT, DEFAULT_LIMIT)));
         return generateFirstGeneration(limits);
+    }
+
+    public static Generation evolution(Generation generation, int generationCount) {
+        for (int i = 0; i < generationCount; i++) {
+            generation = generation.nextGeneration();
+        }
+        return generation;
     }
 
     public Generation nextGeneration() {
@@ -136,7 +156,13 @@ public class Generation {
     private void multiply() {
         this.normalize();
 
-        for (int i = 0; i < multiplyNumber; i++) {
+        IntStream range = IntStream.range(0, multiplyNumber);
+
+        if (isParallel) {
+            range = range.parallel();
+        }
+
+        range.forEach(i -> {
             Random random = new Random();
             Instance parent1 = findByProp(random.nextDouble());
             Instance parent2 = findByProp(random.nextDouble());
@@ -146,7 +172,7 @@ public class Generation {
                 child.mutate();
             }
             this.add(child);
-        }
+        });
 
         Collections.sort(population);
     }

@@ -1,4 +1,4 @@
-package ua.nulp.rozrhakha;
+package ua.nulp.rozrhakha.utils;
 
 public interface Function {
 

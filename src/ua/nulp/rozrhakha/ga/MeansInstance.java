@@ -1,4 +1,4 @@
-package ua.nulp.rozrhakha;
+package ua.nulp.rozrhakha.ga;
 
 import java.util.ArrayList;
 import java.util.Random;

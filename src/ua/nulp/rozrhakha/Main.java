@@ -1,5 +1,10 @@
 package ua.nulp.rozrhakha;
 
+
+import ua.nulp.rozrhakha.ga.Generation;
+import ua.nulp.rozrhakha.ga.MeansInstance;
+import ua.nulp.rozrhakha.utils.Function;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -8,13 +13,7 @@ public class Main {
         Generation.setSize(10);
         Generation.setFunction(f, 2);
         Generation.setInstancePattern(new MeansInstance());
+        Generation lastGen =  Generation.evolution(Generation.generateFirstGeneration(), 100);
 
-        Generation generation = Generation.generateFirstGeneration();
-
-        for (int i = 0; i < 1000; i++) {
-            generation = generation.nextGeneration();
-        }
-
-        System.out.println(f.calculate(1, 2));
     }
 }

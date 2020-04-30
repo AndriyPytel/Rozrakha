@@ -1,4 +1,4 @@
-package ua.nulp.rozrhakha;
+package ua.nulp.rozrhakha.ga;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
