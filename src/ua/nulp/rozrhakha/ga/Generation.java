@@ -18,14 +18,14 @@ public class Generation  {
     private static int multiplyNumber = DEFAULT_MULTIPLY_NUMBER;
     private static double mutationProp = DEFAULT_MUTATION_PROP;
 
+    private static boolean isParallel = true;
+
     private static Instance instancePattern;
     private static Function function;
     private static int params;
-    private static boolean isParallel;
 
     private ArrayList<Instance> population;
     private HashMap<Double, Instance> multiplyFrequencies;
-
 
 
     public static void setFunction(Function function, int params){
@@ -53,6 +53,10 @@ public class Generation  {
         Generation.isParallel = isParallel;
     }
 
+    public static void setThreadNum(int threadNum) {
+        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", String.valueOf(threadNum));
+    }
+
     public static void setGenerationParams(int size, int multiplyNumber, double mutationProp) {
         setSize(size);
         setMultiplyNumber(multiplyNumber);
@@ -66,7 +70,8 @@ public class Generation  {
     static Generation generateFirstGeneration(ArrayList<Entry<Double, Double>> limits) {
         Generation first = new Generation();
         Random random = new Random();
-        IntStream range = IntStream.range(0, multiplyNumber);
+        random.setSeed(System.currentTimeMillis());
+        IntStream range = IntStream.range(0, size);
 
         if (isParallel) {
             range = range.parallel();
@@ -104,6 +109,8 @@ public class Generation  {
         return generation;
     }
 
+
+
     public Generation nextGeneration() {
         this.multiply();
 
@@ -114,7 +121,7 @@ public class Generation  {
     }
 
 
-    public void add(Instance instance) {
+    synchronized public void add(Instance instance) {
         double[] values = instance.getValues().stream().mapToDouble(Double::doubleValue).toArray();
         instance.setLoss(function.calculate(values));
 
